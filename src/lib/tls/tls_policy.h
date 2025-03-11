@@ -560,7 +560,12 @@ class BOTAN_PUBLIC_API(2, 0) Policy {
       * Same as calling `print` on a ostringstream and reading o.str()
       */
       std::string to_string() const;
+      
 
+      /**
+      * 
+      */
+      virtual bool allow_share_certificate_authorities_dn() const;
       virtual ~Policy() = default;
 };
 

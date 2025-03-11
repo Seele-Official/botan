@@ -105,19 +105,26 @@ std::optional<Certificate_Request_13> Certificate_Request_13::maybe_create(const
                                                                            Credentials_Manager& cred_mgr,
                                                                            Callbacks& callbacks,
                                                                            const Policy& policy) {
-   const auto trusted_CAs = cred_mgr.trusted_certificate_authorities("tls-server", client_hello.sni_hostname());
 
-   std::vector<X509_DN> client_auth_CAs;
-   for(const auto store : trusted_CAs) {
-      const auto subjects = store->all_subjects();
-      client_auth_CAs.insert(client_auth_CAs.end(), subjects.begin(), subjects.end());
-   }
+   if (policy.allow_share_certificate_authorities_dn()){
+      std::vector<X509_DN> client_auth_CAs;
 
-   if(client_auth_CAs.empty() && !policy.request_client_certificate_authentication()) {
-      return std::nullopt;
-   }
+      const auto trusted_CAs = cred_mgr.trusted_certificate_authorities("tls-server", client_hello.sni_hostname());
+      for(const auto store : trusted_CAs) {
+         const auto subjects = store->all_subjects();
+         client_auth_CAs.insert(client_auth_CAs.end(), subjects.begin(), subjects.end());
+      }
 
-   return Certificate_Request_13(std::move(client_auth_CAs), policy, callbacks);
+      if(client_auth_CAs.empty() && !policy.request_client_certificate_authentication()) {
+         return std::nullopt;
+      }
+      
+      return Certificate_Request_13(std::move(client_auth_CAs), policy, callbacks);
+   }else {
+      
+      return Certificate_Request_13({}, policy, callbacks);
+   }                                                                           
+
 }
 
 std::vector<X509_DN> Certificate_Request_13::acceptable_CAs() const {

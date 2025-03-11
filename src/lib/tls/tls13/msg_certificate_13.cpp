@@ -25,6 +25,7 @@
 
 #include <iterator>
 #include <memory>
+#include <vector>
 
 namespace Botan::TLS {
 
@@ -40,10 +41,10 @@ bool certificate_allows_signing(const X509_Certificate& cert) {
 }
 
 std::vector<std::string> filter_signature_schemes(const std::vector<Signature_Scheme>& peer_scheme_preference) {
-   std::vector<std::string> compatible_schemes;
+   std::set<std::string> compatible_schemes;
    for(const auto& scheme : peer_scheme_preference) {
       if(scheme.is_available() && scheme.is_compatible_with(Protocol_Version::TLS_V13)) {
-         compatible_schemes.push_back(scheme.algorithm_name());
+         compatible_schemes.emplace(scheme.algorithm_name());
       }
    }
 
@@ -51,7 +52,7 @@ std::vector<std::string> filter_signature_schemes(const std::vector<Signature_Sc
       throw TLS_Exception(Alert::HandshakeFailure, "Failed to agree on any signature algorithm");
    }
 
-   return compatible_schemes;
+   return std::vector<std::string>(compatible_schemes.begin(), compatible_schemes.end());
 }
 
 }  // namespace

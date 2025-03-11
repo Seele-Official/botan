@@ -474,6 +474,11 @@ std::vector<uint16_t> Policy::srtp_profiles() const {
    return std::vector<uint16_t>();
 }
 
+bool Policy::allow_share_certificate_authorities_dn() const {
+   return true;
+}
+
+
 namespace {
 
 class Ciphersuite_Preference_Ordering final {
